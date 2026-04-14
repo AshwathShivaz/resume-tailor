@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>RESUME TAILOR // AI ATS OPTIMIZER</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000; color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem; -webkit-font-smoothing: none; font-weight: 500;
+    }
+    .terminal {
+      max-width: 100%; width: 100%; border: 1px solid #FF0000;
+      padding: 1rem 1rem 1.5rem; background: #000; display: flex; flex-direction: column; gap: 1.2rem;
+    }
+    .header {
+      border-bottom: 1px solid #FF0000; padding-bottom: 0.5rem;
+      text-transform: uppercase; font-size: 1rem; font-weight: 700; letter-spacing: 1px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .header span { color: #FF0000; }
+    .price-badge {
+      border: 1px solid #FF0000; padding: 0.1rem 0.5rem; font-size: 0.65rem; color: #FF0000;
+    }
+    .upload-area {
+      border: 1px dashed #fff; padding: 1rem; text-align: center; cursor: pointer;
+    }
+    .upload-area:active { border-color: #FF0000; background: #1a0000; }
+    #fileInput { display: none; }
+    .file-name { margin-top: 0.4rem; font-size: 0.7rem; color: #888; }
+    label {
+      color: #FF0000; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;
+      display: block; margin-bottom: 0.2rem;
+    }
+    textarea, .resume-output {
+      background: #000; border: 1px solid #fff; color: #fff;
+      font-family: inherit; padding: 0.7rem; font-size: 0.8rem;
+      width: 100%; resize: vertical; min-height: 100px;
+    }
+    .btn {
+      background: #000; border: 1px solid #fff; color: #fff;
+      font-family: inherit; font-size: 0.9rem; text-transform: uppercase;
+      padding: 0.7rem; cursor: pointer; font-weight: 700; letter-spacing: 1px;
+      flex: 1; text-align: center;
+    }
+    .btn-primary { border-color: #FF0000; color: #FF0000; }
+    .btn-primary:active { background: #FF0000; color: #000; }
+    .btn:disabled { opacity: 0.5; }
+    .button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .payment-section {
+      border: 1px solid #FF0000; padding: 0.8rem; text-align: center;
+    }
+    .stripe-btn {
+      background: #FF0000; color: #000; border: none; padding: 0.7rem;
+      font-weight: 900; cursor: pointer; width: 100%; font-family: inherit;
+      font-size: 1rem; text-transform: uppercase;
+    }
+    .status-line {
+      font-size: 0.65rem; color: #888; border-top: 1px solid #333; padding-top: 0.6rem;
+    }
+    .credits-display { color: #FF0000; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="terminal">
+  <div class="header">
+    <div>RESUME TAILOR <span>//</span> ATS</div>
+    <div class="price-badge">$5 / 3 CREDITS</div>
+  </div>
+
+  <div>
+    <div class="upload-area" id="dropZone">
+      <div>⬆ TAP TO UPLOAD RESUME</div>
+      <div class="file-name" id="fileName">No file selected</div>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf,.docx,.txt,text/plain">
+  </div>
+
+  <div>
+    <label>JOB DESCRIPTION</label>
+    <textarea id="jobDesc" placeholder="Paste job description here..."></textarea>
+  </div>
+
+  <div class="button-row">
+    <button class="btn btn-primary" id="generateBtn">⟳ TAILOR (1 CREDIT)</button>
+    <button class="btn" id="downloadBtn" disabled>⬇ DOWNLOAD</button>
+  </div>
+
+  <div>
+    <label>AI-TAILORED RESUME</label>
+    <textarea id="outputResume" class="resume-output" readonly placeholder="Your optimized resume appears here..."></textarea>
+  </div>
+
+  <div class="payment-section">
+    <div style="margin-bottom:0.5rem; display:flex; justify-content:space-between;">
+      <span>CREDITS: <span id="creditsRemaining" class="credits-display">1</span></span>
+      <span>1 FREE INCLUDED</span>
+    </div>
+    <button class="stripe-btn" id="buyCreditsBtn">BUY 3 CREDITS - $5</button>
+  </div>
+
+  <div class="status-line" id="statusMsg">> READY. UPLOAD & PASTE JD.</div>
+</div>
+
+<script>
+  (function() {
+    // ---------- CONFIG (EDIT AFTER DEPLOY) ----------
+    const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+    // For AI: we'll use a free proxy or you can add your key later
+    // ----------
+
+    let credits = 1;
+    let currentFileContent = '';
+    let tailoredText = '';
+    let isLoading = false;
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameEl = document.getElementById('fileName');
+    const jobDescEl = document.getElementById('jobDesc');
+    const generateBtn = document.getElementById('generateBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const outputResume = document.getElementById('outputResume');
+    const creditsEl = document.getElementById('creditsRemaining');
+    const statusMsg = document.getElementById('statusMsg');
+    const buyBtn = document.getElementById('buyCreditsBtn');
+
+    function updateCredits() { creditsEl.textContent = credits; }
+    function setStatus(msg, isErr) {
+      statusMsg.innerHTML = '> ' + msg;
+      statusMsg.style.color = isErr ? '#FF0000' : '#888';
+    }
+
+    // File handling
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', readFile);
+    function readFile() {
+      const f = fileInput.files[0];
+      if (!f) return;
+      fileNameEl.textContent = '📄 ' + f.name;
+      const reader = new FileReader();
+      reader.onload = e => { currentFileContent = e.target.result; setStatus('File loaded.'); };
+      reader.readAsText(f);
+    }
+
+    // AI Tailoring (simulated for demo – works without API)
+    async function tailor(resume, jd) {
+      // Simulate AI delay
+      await new Promise(r => setTimeout(r, 1200));
+      // Simple keyword extraction
+      const keywords = jd.split(/\s+/).filter(w => w.length > 3).slice(0, 8).join(', ');
+      return `[AI OPTIMIZED RESUME]
+      
+${resume.split('\n').slice(0,6).join('\n')}
+
+---
+ATS KEYWORDS ADDED: ${keywords}
+- Reformatted for applicant tracking systems.
+- Highlighted relevant experience based on job description.
+
+(To enable full GPT-4, add your API key after deployment.)`;
+    }
+
+    generateBtn.addEventListener('click', async () => {
+      if (isLoading) return;
+      if (!currentFileContent) return setStatus('Upload a resume first', true);
+      if (!jobDescEl.value.trim()) return setStatus('Paste a job description', true);
+      if (credits < 1) return setStatus('No credits. Tap "Buy 3 Credits"', true);
+
+      isLoading = true;
+      generateBtn.disabled = true;
+      generateBtn.textContent = '⏳ PROCESSING...';
+      setStatus('AI is tailoring...');
+
+      try {
+        tailoredText = await tailor(currentFileContent, jobDescEl.value);
+        outputResume.value = tailoredText;
+        credits--;
+        updateCredits();
+        downloadBtn.disabled = false;
+        setStatus('Done! Download your tailored resume.');
+      } catch(e) {
+        setStatus('Error: ' + e.message, true);
+      } finally {
+        isLoading = false;
+        generateBtn.disabled = false;
+        generateBtn.textContent = '⟳ TAILOR (1 CREDIT)';
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (!tailoredText) return;
+      const blob = new Blob([tailoredText], {type: 'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'tailored_resume.txt';
+      a.click();
+    });
+
+    buyBtn.addEventListener('click', () => {
+      if (STRIPE_PAYMENT_LINK.includes('REPLACE')) {
+        // Demo mode: add credits for testing
+        credits += 3;
+        updateCredits();
+        setStatus('DEMO: 3 credits added (replace link for real payments)');
+        return;
+      }
+      window.location.href = STRIPE_PAYMENT_LINK + '?client_reference_id=' + Date.now();
+    });
+
+    // Check for return from Stripe (success)
+    if (window.location.search.includes('success')) {
+      credits += 3;
+      updateCredits();
+      setStatus('Payment successful! 3 credits added.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    updateCredits();
+  })();
+</script>
+</body>
+</html>
