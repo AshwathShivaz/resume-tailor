@@ -5,63 +5,183 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>RESUME TAILOR // AI ATS OPTIMIZER</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* BRUTALIST NOTHING OS — RED/BLACK/WHITE */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      background: #000; color: #fff;
+      background: #000;
+      color: #fff;
       font-family: 'Courier New', Courier, monospace;
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 0.75rem; -webkit-font-smoothing: none; font-weight: 500;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      -webkit-font-smoothing: none;
+      font-weight: 500;
     }
     .terminal {
-      max-width: 100%; width: 100%; border: 1px solid #FF0000;
-      padding: 1rem 1rem 1.5rem; background: #000; display: flex; flex-direction: column; gap: 1.2rem;
+      max-width: 100%;
+      width: 100%;
+      border: 1px solid #FF0000;
+      padding: 1rem 1rem 1.5rem;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
     }
     .header {
-      border-bottom: 1px solid #FF0000; padding-bottom: 0.5rem;
-      text-transform: uppercase; font-size: 1rem; font-weight: 700; letter-spacing: 1px;
-      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 1px solid #FF0000;
+      padding-bottom: 0.5rem;
+      text-transform: uppercase;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
     .header span { color: #FF0000; }
     .price-badge {
-      border: 1px solid #FF0000; padding: 0.1rem 0.5rem; font-size: 0.65rem; color: #FF0000;
+      border: 1px solid #FF0000;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.65rem;
+      color: #FF0000;
     }
     .upload-area {
-      border: 1px dashed #fff; padding: 1rem; text-align: center; cursor: pointer;
+      border: 1px dashed #fff;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
     }
     .upload-area:active { border-color: #FF0000; background: #1a0000; }
     #fileInput { display: none; }
     .file-name { margin-top: 0.4rem; font-size: 0.7rem; color: #888; }
     label {
-      color: #FF0000; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;
-      display: block; margin-bottom: 0.2rem;
+      color: #FF0000;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 0.2rem;
     }
-    textarea, .resume-output {
-      background: #000; border: 1px solid #fff; color: #fff;
-      font-family: inherit; padding: 0.7rem; font-size: 0.8rem;
-      width: 100%; resize: vertical; min-height: 100px;
+    textarea {
+      background: #000;
+      border: 1px solid #fff;
+      color: #fff;
+      font-family: inherit;
+      padding: 0.7rem;
+      font-size: 0.8rem;
+      width: 100%;
+      resize: vertical;
+      min-height: 100px;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #FF0000;
     }
     .btn {
-      background: #000; border: 1px solid #fff; color: #fff;
-      font-family: inherit; font-size: 0.9rem; text-transform: uppercase;
-      padding: 0.7rem; cursor: pointer; font-weight: 700; letter-spacing: 1px;
-      flex: 1; text-align: center;
+      background: #000;
+      border: 1px solid #fff;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      padding: 0.7rem;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 1px;
+      flex: 1;
+      text-align: center;
     }
     .btn-primary { border-color: #FF0000; color: #FF0000; }
     .btn-primary:active { background: #FF0000; color: #000; }
     .btn:disabled { opacity: 0.5; }
     .button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .payment-section {
-      border: 1px solid #FF0000; padding: 0.8rem; text-align: center;
+      border: 1px solid #FF0000;
+      padding: 0.8rem;
+      text-align: center;
     }
     .stripe-btn {
-      background: #FF0000; color: #000; border: none; padding: 0.7rem;
-      font-weight: 900; cursor: pointer; width: 100%; font-family: inherit;
-      font-size: 1rem; text-transform: uppercase;
+      background: #FF0000;
+      color: #000;
+      border: none;
+      padding: 0.7rem;
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+      font-size: 1rem;
+      text-transform: uppercase;
     }
     .status-line {
-      font-size: 0.65rem; color: #888; border-top: 1px solid #333; padding-top: 0.6rem;
+      font-size: 0.65rem;
+      color: #888;
+      border-top: 1px solid #333;
+      padding-top: 0.6rem;
     }
     .credits-display { color: #FF0000; font-weight: 700; }
+
+    /* RESUME PREVIEW STYLES (Step 1) */
+    .resume-preview {
+      background: #fff;
+      color: #000;
+      border: 1px solid #FF0000;
+      padding: 1.5rem 1.2rem;
+      min-height: 400px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .resume-placeholder {
+      color: #888;
+      text-align: center;
+      padding: 2rem;
+      font-style: italic;
+    }
+    .resume-document {
+      max-width: 100%;
+      background: #fff;
+      color: #000;
+      line-height: 1.4;
+    }
+    .resume-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.8rem;
+    }
+    .resume-name {
+      font-size: 2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.3rem;
+      color: #000;
+    }
+    .resume-contact {
+      font-size: 0.8rem;
+      color: #333;
+    }
+    .resume-section {
+      margin-bottom: 1.2rem;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 0.2rem;
+      margin-bottom: 0.6rem;
+      color: #000;
+    }
+    .section-content {
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -91,7 +211,35 @@
 
   <div>
     <label>AI-TAILORED RESUME</label>
-    <textarea id="outputResume" class="resume-output" readonly placeholder="Your optimized resume appears here..."></textarea>
+    <!-- New Resume Preview (replaces textarea) -->
+    <div id="resumePreview" class="resume-preview">
+      <div class="resume-placeholder">Your tailored resume will appear here...</div>
+    </div>
+    <!-- Hidden template structure (used by JavaScript) -->
+    <template id="resumeTemplate">
+      <div class="resume-document">
+        <div class="resume-header">
+          <div class="resume-name" id="templateName">[NAME]</div>
+          <div class="resume-contact" id="templateContact">[EMAIL] | [PHONE] | [LOCATION]</div>
+        </div>
+        <div class="resume-section">
+          <div class="section-title">SUMMARY</div>
+          <div class="section-content" id="templateSummary"></div>
+        </div>
+        <div class="resume-section">
+          <div class="section-title">EXPERIENCE</div>
+          <div class="section-content" id="templateExperience"></div>
+        </div>
+        <div class="resume-section">
+          <div class="section-title">EDUCATION</div>
+          <div class="section-content" id="templateEducation"></div>
+        </div>
+        <div class="resume-section">
+          <div class="section-title">SKILLS</div>
+          <div class="section-content" id="templateSkills"></div>
+        </div>
+      </div>
+    </template>
   </div>
 
   <div class="payment-section">
@@ -123,7 +271,7 @@
     const jobDescEl = document.getElementById('jobDesc');
     const generateBtn = document.getElementById('generateBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const outputResume = document.getElementById('outputResume');
+    const resumePreview = document.getElementById('resumePreview');
     const creditsEl = document.getElementById('creditsRemaining');
     const statusMsg = document.getElementById('statusMsg');
     const buyBtn = document.getElementById('buyCreditsBtn');
@@ -146,11 +294,36 @@
       reader.readAsText(f);
     }
 
+    // Populate the resume preview template
+    function populateResumeTemplate(aiText) {
+      const template = document.getElementById('resumeTemplate');
+      const clone = template.content.cloneNode(true);
+      
+      // For Step 1: put the entire AI output into the Summary section
+      // (We'll improve parsing in later steps)
+      const summaryEl = clone.querySelector('#templateSummary');
+      const experienceEl = clone.querySelector('#templateExperience');
+      const educationEl = clone.querySelector('#templateEducation');
+      const skillsEl = clone.querySelector('#templateSkills');
+      const nameEl = clone.querySelector('#templateName');
+      const contactEl = clone.querySelector('#templateContact');
+      
+      nameEl.textContent = 'YOUR NAME';
+      contactEl.textContent = 'email@example.com | (123) 456-7890 | City, State';
+      
+      summaryEl.textContent = aiText;
+      experienceEl.textContent = '[Experience will be extracted from AI output]';
+      educationEl.textContent = '[Education will be extracted from AI output]';
+      skillsEl.textContent = '[Skills will be extracted from AI output]';
+      
+      // Clear preview and append the cloned template
+      resumePreview.innerHTML = '';
+      resumePreview.appendChild(clone);
+    }
+
     // AI Tailoring (simulated for demo – works without API)
     async function tailor(resume, jd) {
-      // Simulate AI delay
       await new Promise(r => setTimeout(r, 1200));
-      // Simple keyword extraction
       const keywords = jd.split(/\s+/).filter(w => w.length > 3).slice(0, 8).join(', ');
       return `[AI OPTIMIZED RESUME]
       
@@ -177,7 +350,7 @@ ATS KEYWORDS ADDED: ${keywords}
 
       try {
         tailoredText = await tailor(currentFileContent, jobDescEl.value);
-        outputResume.value = tailoredText;
+        populateResumeTemplate(tailoredText);
         credits--;
         updateCredits();
         downloadBtn.disabled = false;
@@ -202,7 +375,6 @@ ATS KEYWORDS ADDED: ${keywords}
 
     buyBtn.addEventListener('click', () => {
       if (STRIPE_PAYMENT_LINK.includes('REPLACE')) {
-        // Demo mode: add credits for testing
         credits += 3;
         updateCredits();
         setStatus('DEMO: 3 credits added (replace link for real payments)');
@@ -211,7 +383,6 @@ ATS KEYWORDS ADDED: ${keywords}
       window.location.href = STRIPE_PAYMENT_LINK + '?client_reference_id=' + Date.now();
     });
 
-    // Check for return from Stripe (success)
     if (window.location.search.includes('success')) {
       credits += 3;
       updateCredits();
