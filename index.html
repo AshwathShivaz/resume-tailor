@@ -126,7 +126,7 @@
     }
     .credits-display { color: #FF0000; font-weight: 700; }
 
-    /* RESUME PREVIEW STYLES (Step 1) */
+    /* RESUME PREVIEW STYLES */
     .resume-preview {
       background: #fff;
       color: #000;
@@ -211,11 +211,10 @@
 
   <div>
     <label>AI-TAILORED RESUME</label>
-    <!-- New Resume Preview (replaces textarea) -->
     <div id="resumePreview" class="resume-preview">
       <div class="resume-placeholder">Your tailored resume will appear here...</div>
     </div>
-    <!-- Hidden template structure (used by JavaScript) -->
+    <!-- Hidden template structure -->
     <template id="resumeTemplate">
       <div class="resume-document">
         <div class="resume-header">
@@ -294,47 +293,56 @@
       reader.readAsText(f);
     }
 
-    // Populate the resume preview template
-    function populateResumeTemplate(aiText) {
+    // Populate the resume preview template with structured data
+    function populateResumeTemplate(data) {
       const template = document.getElementById('resumeTemplate');
       const clone = template.content.cloneNode(true);
       
-      // For Step 1: put the entire AI output into the Summary section
-      // (We'll improve parsing in later steps)
+      const nameEl = clone.querySelector('#templateName');
+      const contactEl = clone.querySelector('#templateContact');
       const summaryEl = clone.querySelector('#templateSummary');
       const experienceEl = clone.querySelector('#templateExperience');
       const educationEl = clone.querySelector('#templateEducation');
       const skillsEl = clone.querySelector('#templateSkills');
-      const nameEl = clone.querySelector('#templateName');
-      const contactEl = clone.querySelector('#templateContact');
       
-      nameEl.textContent = 'YOUR NAME';
-      contactEl.textContent = 'email@example.com | (123) 456-7890 | City, State';
+      nameEl.textContent = data.name || 'YOUR NAME';
+      contactEl.textContent = data.contact || 'email@example.com | (123) 456-7890 | City, State';
+      summaryEl.textContent = data.summary || '';
+      experienceEl.textContent = data.experience || '';
+      educationEl.textContent = data.education || '';
+      skillsEl.textContent = data.skills || '';
       
-      summaryEl.textContent = aiText;
-      experienceEl.textContent = '[Experience will be extracted from AI output]';
-      educationEl.textContent = '[Education will be extracted from AI output]';
-      skillsEl.textContent = '[Skills will be extracted from AI output]';
-      
-      // Clear preview and append the cloned template
       resumePreview.innerHTML = '';
       resumePreview.appendChild(clone);
     }
 
-    // AI Tailoring (simulated for demo – works without API)
+    // AI Tailoring (structured output simulation - Step 2)
     async function tailor(resume, jd) {
-      await new Promise(r => setTimeout(r, 1200));
-      const keywords = jd.split(/\s+/).filter(w => w.length > 3).slice(0, 8).join(', ');
-      return `[AI OPTIMIZED RESUME]
+      await new Promise(r => setTimeout(r, 1500));
       
-${resume.split('\n').slice(0,6).join('\n')}
+      // Simple name extraction (first line that looks like a name)
+      const nameMatch = resume.match(/^([A-Z][a-z]+ [A-Z][a-z]+)/m) || ['Your Name'];
+      const extractedName = nameMatch[0];
+      
+      // Build structured response
+      const structured = {
+        name: extractedName,
+        contact: 'email@example.com | (123) 456-7890 | City, State',
+        summary: `Results-driven professional with expertise in ${jd.split(/\s+/).slice(0,5).join(', ')}. Proven track record of delivering high-quality solutions and adapting to dynamic environments.`,
+        experience: `• Senior Developer | Tech Company | 2020-Present
+- Led development of scalable applications using modern technologies.
+- Collaborated with cross-functional teams to deliver projects on time.
+- Improved system performance by 30% through optimization.
 
----
-ATS KEYWORDS ADDED: ${keywords}
-- Reformatted for applicant tracking systems.
-- Highlighted relevant experience based on job description.
-
-(To enable full GPT-4, add your API key after deployment.)`;
+• Junior Developer | Startup Inc | 2018-2020
+- Developed and maintained web applications.
+- Assisted in database design and API integration.`,
+        education: `Bachelor of Science in Computer Science
+University of Technology | 2014-2018`,
+        skills: jd.split(/\s+/).filter(w => w.length > 3).slice(0,8).join(' • ')
+      };
+      
+      return structured;
     }
 
     generateBtn.addEventListener('click', async () => {
@@ -349,8 +357,9 @@ ATS KEYWORDS ADDED: ${keywords}
       setStatus('AI is tailoring...');
 
       try {
-        tailoredText = await tailor(currentFileContent, jobDescEl.value);
-        populateResumeTemplate(tailoredText);
+        const structuredResume = await tailor(currentFileContent, jobDescEl.value);
+        tailoredText = JSON.stringify(structuredResume, null, 2); // For download
+        populateResumeTemplate(structuredResume);
         credits--;
         updateCredits();
         downloadBtn.disabled = false;
@@ -366,10 +375,10 @@ ATS KEYWORDS ADDED: ${keywords}
 
     downloadBtn.addEventListener('click', () => {
       if (!tailoredText) return;
-      const blob = new Blob([tailoredText], {type: 'text/plain'});
+      const blob = new Blob([tailoredText], {type: 'application/json'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'tailored_resume.txt';
+      a.download = 'tailored_resume.json';
       a.click();
     });
 
